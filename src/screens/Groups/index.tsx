@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FlatList, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 import { Container } from "./styles";
 import Header from "@components/Header";
@@ -10,13 +11,10 @@ import Button from "@components/Button";
 
 const Groups: React.FC = () => {
   const [groups, setGroups] = useState([
-    "galera do area dev",
-    "amigos",
-    "galera do area dev",
-    "amigos",
-    "galera do area dev",
-    "amigos",
+   
   ]);
+
+  const navigation = useNavigation();
 
   const HeaderComponent = () => {
     return (
@@ -26,6 +24,10 @@ const Groups: React.FC = () => {
       </View>
     );
   };
+
+const handleNewGroup = () => {
+  navigation.navigate("new")
+}
 
   return (
     <Container>
@@ -40,7 +42,7 @@ const Groups: React.FC = () => {
           <ListEmpty message="Que tal cadastrar a primeira turma?" />
         )}
       />
-      <Button title="Criar nova turma" />
+      <Button title="Criar nova turma" onPress={handleNewGroup} />
     </Container>
   );
 };

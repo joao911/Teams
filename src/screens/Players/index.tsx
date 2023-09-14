@@ -10,15 +10,23 @@ import Filter from "@components/Filter";
 import PlayerCard from "@components/PlayerCard";
 import ListEmpty from "@components/ListEmpty";
 import Button from "@components/Button";
+import { useRoute } from "@react-navigation/native";
+
+interface routeParams {
+  group: string;
+}
 
 const Players: React.FC = () => {
   const [team, setTeam] = useState("Time A");
   const [players, setPlayers] = useState(["João Paulo"]);
+  const route = useRoute();
+  const {group} = route.params as routeParams;
+
   return (
     <Container>
       <Header showBackButton />
       <HightLight
-        title="Adicione a turma"
+        title={group}
         subTitle="Adicione a galeta e separe os times"
       />
       <Form>
