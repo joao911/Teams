@@ -45,7 +45,7 @@ const NewGroup: React.FC = () => {
     
   }
 
-  useEffect(()=>{console.log("group", group)},[group])
+ 
 
   return (
     <Container>

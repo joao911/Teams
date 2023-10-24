@@ -1,14 +1,12 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { PlayersGetByGroup } from "./playersGetByGroup";
+import { PlayersGetByGroup } from "./playersGetByGroup"
 
-export const playersGetGroupsAndTeams = async (group: string,team: string) => {
+export const playerGetByGroupAndTeam = async (group: string, team: string) => {
   try {
-    const storage = await PlayersGetByGroup(team)
+    const storage = await PlayersGetByGroup(group)
 
-    const players = storage.filter(players => players.team=== team)
-    
-    return players
+    const players = storage.filter(player => player.team === team)
+    return players;
   } catch (error) {
-    
+    throw error
   }
 }

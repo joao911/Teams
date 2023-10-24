@@ -10,6 +10,7 @@ export const playerAddByGroup = async (newPlayer:PlayersStorageDTO,group: string
 
     const playersAlreadyExists = storedPlayers.filter(player => player.name === newPlayer.name)
 
+    
     if(playersAlreadyExists.length > 0){
       throw new AppError("Essa pessoa já está adicionada em um time aqui")
     }

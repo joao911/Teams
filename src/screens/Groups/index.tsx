@@ -10,8 +10,10 @@ import ListEmpty from "@components/ListEmpty";
 import Button from "@components/Button";
 import { groupsGetAll } from "@storage/group/groupsGetAll";
 
+
 const Groups: React.FC = () => {
   const [groups, setGroups] = useState<string[]>([]);
+  
 
   const navigation = useNavigation();
 
@@ -28,23 +30,24 @@ const Groups: React.FC = () => {
     navigation.navigate("new")
   }
 
-  const fetchGroups = async ()=>{
+  const fetchGroups = async () => {
     try {
-     const data = await groupsGetAll()
-     setGroups(data)
-    } catch (error) {
-     console.log("deu erro:", error)
-     
+      const data = await groupsGetAll();
+      setGroups(data)
+    } catch (erro: any) {
+      console.log('error:', erro);
     }
   }
 
   const handleOpenGroup = (group: string) => {
-    navigation.navigate("players", { group });
+    navigation.navigate("players", { group })
   }
 
-  useFocusEffect(useCallback(()=>{
-    fetchGroups()
-  },[]))
+    useFocusEffect(
+      useCallback(()=>{
+        fetchGroups()
+      },[])
+    )
 
   return (
     <Container>
@@ -53,7 +56,7 @@ const Groups: React.FC = () => {
         stickyHeaderIndices={[0]}
         data={groups}
         keyExtractor={(item) => item}
-        renderItem={({ item }) => <GroupCard title={item} onPress={() => handleOpenGroup(item)}/>}
+        renderItem={({ item }) => <GroupCard title={item} onPress={() => handleOpenGroup(item)} />}
         contentContainerStyle={groups.length === 0 && { flex: 1 }}
         ListEmptyComponent={() => (
           <ListEmpty message="Que tal cadastrar a primeira turma?" />

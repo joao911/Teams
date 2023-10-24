@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { FlatList, ToastAndroid } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { FlatList, TextInput, ToastAndroid, Keyboard, Alert } from "react-native";
 
 import { Container, Form, HeaderList, NumberOfPlayers } from "./styles";
 import Header from "@components/Header";
@@ -10,12 +10,15 @@ import Filter from "@components/Filter";
 import PlayerCard from "@components/PlayerCard";
 import ListEmpty from "@components/ListEmpty";
 import Button from "@components/Button";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { AppError } from "@utils/AppError";
 import { playerAddByGroup } from "@storage/player/playerAddgroup";
 import { PlayersGetByGroup } from "@storage/player/playersGetByGroup";
-import { playersGetGroupsAndTeams } from "@storage/player/playersGetGroupsAndTeams";
+
 import { PlayersStorageDTO } from "@storage/player/PlayerStorageDTO";
+import { playerGetByGroupAndTeam } from "@storage/player/playersGetGroupsAndTeams";
+import { removePlayerByGroup } from "@storage/player/playerRemoveByGroup";
+import { removeGroupByName } from "@storage/group/groupRemoveByName";
 
 
 interface routeParams {
@@ -26,10 +29,10 @@ const Players: React.FC = () => {
   const [team, setTeam] = useState("Time A");
   const [players, setPlayers] = useState<PlayersStorageDTO[]>([]);
   const [newPlayerName, setNewPlayerName] = useState("");
-
+  const navigation = useNavigation();
   const route = useRoute();
   const {group} = route.params as routeParams;
-  
+  const newPlayerNameInputRef = useRef<TextInput>(null);
   const handleAddPlayer =  async() => {
       if(newPlayerName.trim().length === 0){
         return ToastAndroid.showWithGravity(
@@ -46,10 +49,14 @@ const Players: React.FC = () => {
 
       try {
         await playerAddByGroup(newPlayer, group);
+        newPlayerNameInputRef?.current?.blur()
+        Keyboard.dismiss()
         const players = await PlayersGetByGroup(group);
-        console.log("players", players)
+        setNewPlayerName('')
+        fetchPlayersByTeam()
       } catch (error) {
         if(error instanceof AppError){
+          console.log('cai aqui')
           ToastAndroid.showWithGravity(
             error.message,
             ToastAndroid.SHORT,
@@ -68,13 +75,54 @@ const Players: React.FC = () => {
 
   const fetchPlayersByTeam = async () => {
     try {
-      const playersByTeam = await playersGetGroupsAndTeams(group, team)
+      const playersByTeam = await playerGetByGroupAndTeam(group, team)
 
     setPlayers(playersByTeam)
     } catch (error) {
       console.log("deu erro")
+      console.log('error', error)
+
+      ToastAndroid.showWithGravity(
+        "Não foi possível carregar os jogadores",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER,
+      )
     }
   }
+
+  const removePlayer = async (playerName: string) => {
+    try {
+      await removePlayerByGroup(group, playerName)
+      fetchPlayersByTeam()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  const removeGroup = async () => {
+    try {
+      removeGroupByName(group)
+      navigation.navigate("groups")
+    } catch (error) {
+      throw error
+    }
+  }
+
+  const handleRemoveGroup = async () => {
+    Alert.alert(
+      'Remover',
+      'Deseja remover o grupo?',
+      [{
+        text: 'Não', style:'cancel'
+      },
+      {
+        text: 'Sim', onPress: async () => removeGroup()
+      }
+    ]
+    )
+  }
+
+  useEffect(()=>{fetchPlayersByTeam()},[team])
 
   
 
@@ -89,7 +137,12 @@ const Players: React.FC = () => {
       <Form>
         <Input placeholder="Nome da pessoa "
          autoCorrect={false} 
-         onChangeText={setNewPlayerName} />
+         onChangeText={setNewPlayerName} 
+         value={newPlayerName}
+         inputRef={newPlayerNameInputRef}
+         onSubmitEditing={handleAddPlayer}
+         returnKeyType="done"
+         />
         <ButtonIcon icon="add" onPress={handleAddPlayer} />
       </Form>
 
@@ -110,9 +163,9 @@ const Players: React.FC = () => {
       </HeaderList>
       <FlatList
         data={players}
-        keyExtractor={(item) => item}
+        keyExtractor={(item) => item.name}
         renderItem={({ item }) => (
-          <PlayerCard name={item} onRemove={() => {}} />
+          <PlayerCard name={item.name} onRemove={() => {removePlayer(item.name)}} />
         )}
         ListEmptyComponent={() => (
           <ListEmpty message="Que tal cadastrar a primeira turma?" />
@@ -123,7 +176,7 @@ const Players: React.FC = () => {
           players.length === 0 && { flex: 1 },
         ]}
       />
-      <Button title="Remover Turma" type="SECONDARY" />
+      <Button title="Remover Turma" type="SECONDARY" onPress={() => handleRemoveGroup()}/>
     </Container>
   );
 };
