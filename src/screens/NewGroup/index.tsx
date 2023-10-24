@@ -13,7 +13,7 @@ const NewGroup: React.FC = () => {
   const navigation = useNavigation();
 
   const handleNew =()=>{
-    navigation.navigate("players", { group });
+    navigation.navigate("players", { group: "ta indo " });
   }
 
   return (
@@ -28,7 +28,7 @@ const NewGroup: React.FC = () => {
           subTitle="Crie a turma para adicionar as pessoas"
         />
         <Input placeholder="Nome da turma" />
-        <Button title="Criar" style={{ marginTop: 20 }} />
+        <Button title="Criar" style={{ marginTop: 20 }} onPress={handleNew} />
       </Content>
     </Container>
   );
